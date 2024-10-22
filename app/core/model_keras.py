@@ -24,7 +24,7 @@ def load_model(model_path):
     return model
 
 def predict(img_path,threshold=0.5):
-    model = load_model('model_keras.keras')
+    model = load_model('model-3-epoch.keras')
     # Path ke gambar yang ingin diprediksi
     image_path = img_path
     # Preprocessing gambar (misalnya ukuran gambar input yang diharapkan model adalah 224x224)
