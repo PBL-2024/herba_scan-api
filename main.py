@@ -42,7 +42,7 @@ async def predict_image(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     
     # Perform prediction
-    predict = model_keras.predict(file_location)
+    predict = model_keras.predict(file_location,0.9)
     
     # Delete the file after prediction
     os.remove(file_location)
