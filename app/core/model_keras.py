@@ -49,12 +49,12 @@ def predict(img_path,threshold=0.5):
     'Lidah Buaya']
     # Konversi indeks prediksi menjadi nama kelas
     predicted_class_name = class_names[predicted_class[0]]
-
-    for i, prediction in enumerate(predictions):
-        conf = np.max(prediction)  # Confidence score tertinggi
-        predicted_class = np.argmax(prediction)  # Kelas dengan nilai probabilitas tertinggi
+    return predicted_class_name
+    # for i, prediction in enumerate(predictions):
+    #     conf = np.max(prediction)  # Confidence score tertinggi
+    #     predicted_class = np.argmax(prediction)  # Kelas dengan nilai probabilitas tertinggi
         
-        if conf > threshold:
-            return {"class": predicted_class_name, "confidence": conf}
-        else:
-            return {"class": "Unknown", "confidence": conf}
+    #     if conf > threshold:
+    #         return {"class": predicted_class_name, "confidence": conf}
+    #     else:
+    #         return {"class": "Unknown", "confidence": conf}
