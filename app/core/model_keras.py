@@ -52,7 +52,7 @@ def predict(img_path,threshold=0.5):
     # return predicted_class_name
     for i, prediction in enumerate(predictions):
         conf = np.max(prediction)  # Confidence score tertinggi
-        predicted_class = np.argmax(prediction)  # Kelas dengan nilai probabilitas tertinggi
+        # predicted_class = np.argmax(prediction)  # Kelas dengan nilai probabilitas tertinggi
         
         if conf > threshold:
             return {"class": predicted_class_name, "confidence": conf}
