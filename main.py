@@ -1,4 +1,4 @@
-from app.core import config, model_predict, model_keras, yolo
+from app.core import config, model_predict, yolo
 from fastapi import FastAPI, File, UploadFile
 import shutil
 import os
