@@ -45,7 +45,7 @@ async def predict_image(file: UploadFile = File(...)):
     predict = model_keras.predict(file_location,0.9)
     
     # Delete the file after prediction
-    # os.remove(file_location)
+    os.remove(file_location)
     
     return predict
 
@@ -64,5 +64,7 @@ async def predict_image(file: UploadFile = File(...)):
     
     # Perform prediction
     predict = yolo.predict_image(file_location)
+    
+    os.remove(file_location)
     
     return predict
