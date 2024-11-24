@@ -1,10 +1,10 @@
-from app.core import config, model_predict, yolo
+from app.core import model_predict, yolo
 from fastapi import FastAPI, File, UploadFile
 import shutil
 import os
+from ultralytics import SAM
 
-config = config.Config()
-
+model = SAM('mobile_sam.pt')
 app = FastAPI()
 
 @app.post("/predict/")
@@ -63,7 +63,7 @@ async def predict_image(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     
     # Perform prediction
-    predict = yolo.predict_image(file_location)
+    predict = yolo.predict_image(file_location,model)
     
     os.remove(file_location)
     
