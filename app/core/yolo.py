@@ -11,9 +11,15 @@ def segment_image(image_path, model, labels=None, device='cpu'):
     # Baca gambar
     img = cv2.imread(image_path)
     h, w = img.shape[:2]
-    
+
     # Prediksi menggunakan model YOLO
-    result = model.predict(image_path, points=[w / 2, h / 2], labels=labels or [1], device=device)
+    result = model.predict(
+        image_path,
+        points=[[w / 2, h / 2], [w / 1.5, h / 1.5], [w / 0.5, h / 0.5]],
+        labels=labels or [1],
+        device=device,
+        save=True
+    )
 
     # Akses masks
     masks = result[0].masks  # results adalah objek YOLO
@@ -25,25 +31,39 @@ def segment_image(image_path, model, labels=None, device='cpu'):
     # Ambil gambar asli
     orig_img = result[0].orig_img
 
-    # Ambil mask pertama (jika ada beberapa objek)
-    selected_mask = mask_array[0]  # Misal ambil mask pertama
+    # Cari mask dengan kontur terbesar
+    max_area = 0
+    largest_mask = None
+    for mask in mask_array:
+        # Konversi mask menjadi biner
+        binary_mask = (mask > 0.5).astype(np.uint8) * 255
 
-    # Konversi mask menjadi biner (0 dan 255 untuk aplikasi pada gambar)
-    binary_mask = (selected_mask > 0.5).astype(np.uint8) * 255
+        # Hitung kontur dan area
+        contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if area > max_area:
+                max_area = area
+                largest_mask = binary_mask
 
-    # Terapkan mask ke gambar asli
-    masked_image = cv2.bitwise_and(orig_img, orig_img, mask=binary_mask)
+    if largest_mask is None:
+        raise ValueError("No valid contours found.")
 
-    # Hitung bounding box
-    x, y, w, h = cv2.boundingRect(binary_mask)
+    # Terapkan mask terbesar ke gambar asli
+    masked_image = cv2.bitwise_and(orig_img, orig_img, mask=largest_mask)
+
+    # Hitung bounding box dari mask terbesar
+    x, y, w, h = cv2.boundingRect(largest_mask)
 
     # Potong area berdasarkan bounding box
     cropped_image = masked_image[y:y + h, x:x + w]
-    cropped_mask = binary_mask[y:y + h, x:x + w]
+    cropped_mask = largest_mask[y:y + h, x:x + w]
     cropped_image = cropped_image.copy()
 
     # Ubah latar belakang hitam menjadi putih
     cropped_image[cropped_mask == 0] = [255, 255, 255]
+
+    # Konversi ke RGB untuk ditampilkan dengan matplotlib
     cropped_image = cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB)
 
     return cropped_image
@@ -57,7 +77,7 @@ def predict_image(img_path):
     
     model = SAM('mobile_sam.pt')
 
-    cropped_image = segment_image(img_path, model, labels=[1], device='cpu')
+    cropped_image = segment_image(img_path, model, labels=[1,1,1], device='cpu')
     file_path = "tmp/cropped_image.jpg"
     cv2.imwrite(file_path, cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR))
     with open(file_path, "rb") as f:
