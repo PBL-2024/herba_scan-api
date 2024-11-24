@@ -17,7 +17,6 @@ def segment_image(image_path, model, labels=None, device='cpu'):
         points=[[w / 1.5, h / 1.5], [w / 0.5, h / 0.5]],
         labels=labels or [1],
         device=device,
-        save=True
     )
 
     # Akses masks
