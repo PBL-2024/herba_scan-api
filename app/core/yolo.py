@@ -16,7 +16,7 @@ def segment_image(image_path, model, labels=None, device='cpu'):
         image_path,
         # points=[[w / 1.5, h / 1.5], [w / 0.5, h / 0.5]],
         # labels=labels or [1],
-        conf=0.55,
+        conf=0.40,
         iou=0.70,
         device=device,
         imgsz=400,
