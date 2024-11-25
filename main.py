@@ -2,9 +2,10 @@ from app.core import model_predict, yolo
 from fastapi import FastAPI, File, UploadFile
 import shutil
 import os
-from ultralytics import SAM
+from ultralytics import SAM,FastSAM
 
-model = SAM('mobile_sam.pt')
+# model = SAM('mobile_sam.pt')
+model = FastSAM('FastSAM-s.pt')
 app = FastAPI()
 
 @app.post("/predict/")

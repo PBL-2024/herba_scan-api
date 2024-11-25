@@ -14,9 +14,13 @@ def segment_image(image_path, model, labels=None, device='cpu'):
     # Prediksi menggunakan model YOLO
     result = model.predict(
         image_path,
-        points=[[w / 1.5, h / 1.5], [w / 0.5, h / 0.5]],
-        labels=labels or [1],
+        # points=[[w / 1.5, h / 1.5], [w / 0.5, h / 0.5]],
+        # labels=labels or [1],
+        conf=0.55,
+        iou=0.70,
         device=device,
+        imgsz=400,
+        # save=True
     )
 
     # Akses masks
@@ -47,6 +51,8 @@ def segment_image(image_path, model, labels=None, device='cpu'):
     if largest_mask is None:
         raise ValueError("No valid contours found.")
 
+    orig_img = cv2.resize(orig_img, (400 ,400))
+    largest_mask = cv2.resize(largest_mask, (400,400))
     # Terapkan mask terbesar ke gambar asli
     masked_image = cv2.bitwise_and(orig_img, orig_img, mask=largest_mask)
 
