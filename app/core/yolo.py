@@ -16,12 +16,12 @@ def segment_image(image_path, model, labels=None, device='cpu'):
     try:
         result = model.predict(
             image_path,
-            points=[w / 2, h / 2],
-            labels=labels or [1],
-            conf=0.60,
-            iou=0.70,
+            # points=[w / 2, h / 2],
+            # labels=labels or [1],
+            conf=0.65,
+            iou=0.90,
             device=device,
-            imgsz=416,
+            imgsz=640,
             # save=True
         )
     except Exception as e:
@@ -59,8 +59,7 @@ def segment_image(image_path, model, labels=None, device='cpu'):
     if largest_mask is None:
         return img
 
-    orig_img = cv2.resize(orig_img, (416 ,416))
-    largest_mask = cv2.resize(largest_mask, (416,416))
+    largest_mask = cv2.resize(largest_mask, (w,h))
     
     # Hitung bounding box dari mask terbesar
     x, y, w, h = cv2.boundingRect(largest_mask)
@@ -78,14 +77,16 @@ def segment_image(image_path, model, labels=None, device='cpu'):
 def predict_image(img_path,model):
     url = "https://predict.ultralytics.com"
     headers = {"x-api-key": Config.API_KEY}
-    data = {"model": Config.MODEL_URL, "imgsz": 640, "conf": 0.85, "iou": 0.70}
+    data = {"model": Config.MODEL_URL, "imgsz": 640, "conf": 0.8, "iou": 0.70}
     cropped_image = segment_image(img_path, model, labels=[1], device='cpu')
+    # upscale image to with 640px
+    cropped_image = cv2.resize(cropped_image, (800, 800))
     file_path = "tmp/cropped_image.jpg"
     cv2.imwrite(file_path, cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR))
     with open(file_path, "rb") as f:
         response = requests.post(url, headers=headers, data=data, files={"file": f})
     # delete temporary file
-    os.remove(file_path)
+    # os.remove(file_path)
 
     # Check for successful response
     response.raise_for_status()
