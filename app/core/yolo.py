@@ -1,5 +1,6 @@
 import os
 import json
+from fastapi import status, HTTPException
 import requests
 import cv2
 import numpy as np
@@ -31,12 +32,9 @@ def segment_image(image_path, model, labels=None, device='cpu'):
         return img
     # Akses masks
     masks = result[0].masks  # results adalah objek YOLO
-    if masks is not None:
-        if masks.data is None:
-            return img
-        mask_array = masks.data.cpu().numpy()  # Konversi ke NumPy array
-    else:
-        return img
+    if masks is None:
+        return None
+    mask_array = masks.data.cpu().numpy()  # Konversi ke NumPy array
 
     # Ambil gambar asli
     orig_img = result[0].orig_img
@@ -57,7 +55,7 @@ def segment_image(image_path, model, labels=None, device='cpu'):
                 largest_mask = binary_mask
 
     if largest_mask is None:
-        return img
+        return None
 
     largest_mask = cv2.resize(largest_mask, (w,h))
     
@@ -79,6 +77,9 @@ def predict_image(img_path,model):
     headers = {"x-api-key": Config.API_KEY}
     data = {"model": Config.MODEL_URL, "imgsz": 640, "conf": 0.8, "iou": 0.70}
     cropped_image = segment_image(img_path, model, labels=[1], device='cpu')
+    if cropped_image is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No object detected in the image")
+
     # upscale image to with 640px
     cropped_image = cv2.resize(cropped_image, (800, 800))
     file_path = "tmp/cropped_image.jpg"
@@ -86,7 +87,7 @@ def predict_image(img_path,model):
     with open(file_path, "rb") as f:
         response = requests.post(url, headers=headers, data=data, files={"file": f})
     # delete temporary file
-    # os.remove(file_path)
+    os.remove(file_path)
 
     # Check for successful response
     response.raise_for_status()
