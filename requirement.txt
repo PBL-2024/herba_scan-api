@@ -8,3 +8,7 @@ joblib
 matplotlib
 fastapi
 uvicorn
+requests
+python-multipart
+python-dotenv
+ultralytics
