@@ -7,3 +7,7 @@ services:
     env_file:
       - .env
     restart: always
+
+networks:
+  proxy:
+    external: true
